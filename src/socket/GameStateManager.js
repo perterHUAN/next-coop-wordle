@@ -80,14 +80,13 @@ class GameStateManager {
       this.gameState.gameStatus = false;
       return generateNewState("You lose", this.gameState);
     }
-    this.gameState.turn =
-      (this.gameState.turn + 1) % this.playersCount();
+    this.gameState.turn = (this.gameState.turn + 1) % this.playersCount();
     return generateNewState("", this.gameState);
   }
 
   addPlayer(id) {
     if (this.playersCount() >= 2)
-      return generateNewState("Add Room Failed", this.gameState);
+      return generateNewState("Add Room Failed", generateInitalGameState());
     for (const k of [0, 1]) {
       if (!(k in this.gameState.players)) {
         this.gameState.players[k] = id;

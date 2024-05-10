@@ -3,107 +3,38 @@ import React from "react";
 import { Delete, CircleCheckBig } from "lucide-react";
 import { keyboard } from "@/constants";
 import Notification from "@/components/Notification";
-import createPlayRoom from "@/socket/createPlayRoom";
 import { useSearchParams } from "next/navigation";
-import { generatePlayRoomUrl, generateConnectUrl, range } from "@/utils";
-import createClientSocket from "@/socket/createClientSocket";
+import { log } from "@/utils";
+import useSocket from "@/hooks/useSocket";
+import useNotify from "@/hooks/useNotify";
+import useTwoPlayer from "@/hooks/useTwoPlayer";
+import { range } from "@/utils";
 
 export default function Home() {
   const searchParams = useSearchParams();
-  const [message, setMessage] = React.useState("");
-  const [socket, setSocket] = React.useState("");
-  const [roomId, setRoomId] = React.useState(searchParams.get("roomId") || "");
-  const [twoPlayer, setTwoPlayer] = React.useState(false);
-  console.log("roomId", roomId);
-  const playRoomUrl = !roomId ? "" : generatePlayRoomUrl(roomId);
-  const connectUrl = !roomId ? "" : generateConnectUrl(roomId);
+  const [message, notify] = useNotify();
   const [gameState, setGameState] = React.useState(null);
+  const [playRoomUrl, socketId, setRoomId] = useSocket(
+    searchParams.get("roomId") || "",
+    setGameState,
+    notify
+  );
+  const [twoPlayer, toggleTwoPlayer] = useTwoPlayer(setRoomId, notify);
 
-  function notify(message) {
-    setMessage(message);
-    setTimeout(() => setMessage(""), 2000);
-  }
+  log("gameState: ", gameState);
 
-  function toggleTwoPlayer() {
-    if (!twoPlayer) {
-      createPlayRoom()
-        .then(({ roomId }) => {
-          setRoomId(roomId);
-          setTwoPlayer(!twoPlayer);
-          notify(
-            "create play room successful!! playroom url will be found on the right sidebar."
-          );
-        })
-        .catch((error) => {
-          console.error("error: ", error);
-          notify("createRoom failed");
-        });
-    } else {
-      notify("close playroom!!!");
-      setTwoPlayer(!twoPlayer);
-    }
-  }
-  console.log("playroomurl: ", playRoomUrl, "connectUrl: ", connectUrl);
-  React.useEffect(() => {
-    if (connectUrl) {
-      console.log("link");
-      const socket = createClientSocket(connectUrl);
-      setSocket(socket);
-      return () => {
-        console.log("remove");
-        setSocket(null);
-        setRoomId("");
-      };
-    } else {
-      console.log("in: ", connectUrl);
-    }
-  }, [connectUrl]);
-
-  console.log("socket", socket);
-  React.useEffect(() => {
-    if (socket) {
-      function handleKeyDown(event) {
-        const key = event.key;
-        console.log("key", key);
-        if (!keyboard.flat().includes(key)) return;
-
-        socket.emit("type", key);
-      }
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [socket]);
-
-  React.useEffect(() => {
-    if (socket) {
-      socket.on("type", ({ notification, gameState }) => {
-        notify(notification);
-        setGameState(gameState);
-      });
-
-      socket.on("start game", ({ gameState }) => {
-        setGameState(gameState);
-        notify("start game");
-      });
-
-      socket.on("add player", ({ notification, gameState }) => {
-        // console.log("add player: ", data);
-        notify(notification);
-        setGameState(gameState);
-      });
-      socket.on("leave", ({ gameState }) => {
-        setGameState(gameState);
-      });
-    }
-  }, [socket]);
+  const isInRoom =
+    socketId &&
+    gameState &&
+    Object.entries(gameState.players).some((player) => player[1] === socketId);
   return (
     <main className="flex min-h-screen flex-col items-center justify-between">
       <div className="flex flex-row items-center justify-between gap-10 py-2 border-b text-slate-500">
-        {gameState && (
+        {isInRoom && (
           <PlayersStatus
             players={Object.entries(gameState.players).map((e) => e[1])}
             turn={gameState.players[gameState.turn]}
-            me={socket.id}
+            me={socketId}
           />
         )}
         <p className="font-semibold text-4xl tracking-widest uppercase select-none">
@@ -161,6 +92,7 @@ function Button({ enable, toggle }) {
         enable ? "bg-green-600 border-green-600" : "bg-gray-300 border-gray-300"
       } w-10 h-5 rounded-full border-2 box-content relative cursor-pointer`}
       onClick={toggle}
+      data-testid="two-player-button"
     >
       <div
         className={`bg-white w-5 h-5 rounded-full absolute top-0 transition-transform ${
@@ -195,10 +127,13 @@ function PlayRoomInfo({ url }) {
       }`}
     >
       <div className="flex flex-row items-center justify-between rounded overflow-hidden">
-        <p className="bg-slate-200 py-1 px-2">{url}</p>
+        <p className="bg-slate-200 py-1 px-2" data-testid="room-url">
+          {url}
+        </p>
         <p
           className="bg-slate-400 py-1 px-2 cursor-pointer"
           onClick={handlePaste}
+          data-testid="paste-url"
         >
           {!paste ? "copy link" : <CircleCheckBig />}
         </p>
@@ -208,13 +143,14 @@ function PlayRoomInfo({ url }) {
           show ? "hidden" : "block"
         }`}
         onClick={() => setShow(true)}
+        data-testid="show-room-url"
       ></div>
     </div>
   );
 }
 function PlayersStatus({ players, turn, me }) {
   return (
-    <div className="w-10 h-10 relative">
+    <div className="w-10 h-10 relative" data-testid="players-status">
       {players.map((player, idx) => {
         return (
           <div

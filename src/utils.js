@@ -41,5 +41,13 @@ export function isWord(str) {
 }
 
 export function generateNewState(notification, gameState) {
+  if (notification === undefined || gameState === undefined) {
+    throw new Error("notification or gameState is undefined");
+  }
   return { notification, gameState };
+}
+
+const ENALBE_LOG = true;
+export function log(...args) {
+  if (ENALBE_LOG) console.log(...args);
 }
