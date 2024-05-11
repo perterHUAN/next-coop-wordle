@@ -1,4 +1,3 @@
-import { domain, hostname } from "./constants";
 export function range(start, end, step = 1) {
   if (start === undefined) throw new Error("must pass at least one parameter");
   if (end === undefined) {
@@ -24,11 +23,12 @@ export function generateUniquePort() {
   usedPorts.push(port);
   return port;
 }
+
 export function generatePlayRoomUrl(roomId) {
-  return `${domain}/?roomId=${roomId}`;
-} 
+  return `${window.location.origin}/?roomId=${roomId}`;
+}
 export function generateConnectUrl(roomId) {
-  return `${hostname}:${roomId}`;
+  return `${window.location.protocol}//${window.location.hostname}:${roomId}`;
 }
 export function generateNewState(notification, gameState) {
   if (notification === undefined || gameState === undefined) {
