@@ -4,7 +4,7 @@ class ServerManager {
   constructor(gameStateManager) {
     this.io = new Server({
       cors: {
-        origin: "http://localhost:3000",
+        origin: "*",
       },
     });
     this.idToSocket = new Map();
