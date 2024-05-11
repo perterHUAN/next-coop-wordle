@@ -1,4 +1,5 @@
-import { isWord, generateNewState, generateRandomAnswer } from "@/utils";
+import { generateNewState } from "@/utils";
+import { isWord, generateRandomAnswer } from "@/data";
 import { keyboard, guessTimes, wordLength } from "@/constants";
 
 class GameStateManager {
@@ -69,15 +70,13 @@ class GameStateManager {
       (e) => e === 0
     );
     if (isWin) {
-      action.notify("You win");
-      action.endGame();
       this.gameState.gameStatus = false;
+      this.gameState.result = "win";
       return generateNewState("You win", this.gameState);
     }
     if (this.gameState.rowIdx >= 6 && !isWin) {
-      action.notify("You lose");
-      action.endGame();
       this.gameState.gameStatus = false;
+      this.gameState.result = "lose";
       return generateNewState("You lose", this.gameState);
     }
     this.gameState.turn = (this.gameState.turn + 1) % this.playersCount();
@@ -121,7 +120,7 @@ class GameStateManager {
     return this.playersIds().includes(id);
   }
 }
-function generateInitalGameState() {
+export function generateInitalGameState() {
   return {
     boardState: Array.from({ length: guessTimes }, () => ""),
     evaluation: Array.from({ length: guessTimes }, () =>
@@ -136,6 +135,7 @@ function generateInitalGameState() {
     gameStatus: false,
     turn: 0,
     players: {},
+    result: "none",
   };
 }
 export default GameStateManager;

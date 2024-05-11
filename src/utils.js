@@ -29,17 +29,6 @@ export function generatePlayRoomUrl(roomId) {
 export function generateConnectUrl(roomId) {
   return `http://localhost:${roomId}`;
 }
-
-export function generateRandomAnswer() {
-  // todo
-  return "words";
-}
-
-export function isWord(str) {
-  // todo
-  return true;
-}
-
 export function generateNewState(notification, gameState) {
   if (notification === undefined || gameState === undefined) {
     throw new Error("notification or gameState is undefined");
@@ -50,4 +39,40 @@ export function generateNewState(notification, gameState) {
 const ENALBE_LOG = true;
 export function log(...args) {
   if (ENALBE_LOG) console.log(...args);
+}
+const keyBoardColors = [
+  "--key-bg-correct",
+  "--key-bg-present",
+  "--key-bg-absent",
+  "--key-bg",
+];
+const boardColor = [
+  "--key-bg-correct",
+  "--key-bg-present",
+  "--key-bg-absent",
+  "--color-tone-7",
+];
+export function keyBoardStateToBgColorVariable(num) {
+  return `var(${keyBoardColors[num]})`;
+}
+export function boardStateToBgColorVariable(num) {
+  return `var(${boardColor[num]})`;
+}
+
+export function generateCellStyle(value, evalution) {
+  if (value === "") {
+    return {
+      border: "2px solid var(--color-tone-4)",
+    };
+  } else if (evalution === 3) {
+    return {
+      border: "2px solid var(--color-tone-3)",
+      color: "var(--key-text-color)",
+    };
+  } else {
+    return {
+      backgroundColor: boardStateToBgColorVariable(evalution),
+      color: "var(--tile-text-color)",
+    };
+  }
 }

@@ -1,0 +1,11 @@
+.flip-back {
+  transform: rotateX(180deg);
+}
+.flip .flip-front {
+  transition: transform 1s;
+  transform: rotateX(180deg);
+}
+.flip .flip-back {
+  transition: transform 1s;
+  transform: rotateX(0deg);
+}

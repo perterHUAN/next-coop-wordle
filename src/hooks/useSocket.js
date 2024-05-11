@@ -44,6 +44,7 @@ function useSocket(intialRoomId, setGameState, notify) {
       function response(data) {
         notify(data.notification);
         setGameState(data.gameState);
+        log("notification: ", data.notification);
       }
       for (const event of ["type", "start game", "add player", "leave"]) {
         socket.on(event, response);

@@ -8,9 +8,6 @@ function useTwoPlayer(setRoomId, notify) {
         .then(({ roomId }) => {
           setRoomId(roomId);
           setTwoPlayer(!twoPlayer);
-          notify(
-            "create play room successful!! playroom url will be found on the right sidebar."
-          );
         })
         .catch((error) => {
           console.error("error: ", error);

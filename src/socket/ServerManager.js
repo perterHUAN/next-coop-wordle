@@ -30,7 +30,7 @@ class ServerManager {
       this.gameStateManager.gameState.gameStatus = true;
       this.emitToAllPlayers(
         "start game",
-        generateNewState("", this.gameStateManager.gameState)
+        generateNewState("start game", this.gameStateManager.gameState)
       );
     }
   }
@@ -46,21 +46,24 @@ class ServerManager {
   }
   type(socket, data) {
     log(socket.id, "type", data);
+    if (!this.gameStateManager.gameState.gameStatus) {
+      return socket.emit(
+        "type",
+        generateNewState(
+          this.gameStateManager.gameState.result === "none"
+            ? "Insufficient players, unable to start the game."
+            : "The current game has ended.",
+          this.gameStateManager.gameState
+        )
+      );
+    }
     if (this.gameStateManager.currentPlayer() !== socket.id) {
       return socket.emit(
         "type",
         generateNewState("Not Your Turn", this.gameStateManager.gameState)
       );
     }
-    if (!this.gameStateManager.gameState.gameStatus) {
-      return socket.emit(
-        "type",
-        generateNewState(
-          "Players are not all present, unable to start the game.",
-          this.gameStateManager.gameState
-        )
-      );
-    }
+
     let res = null;
     if (this.gameStateManager.checkValidPlayer(socket.id)) {
       if (data === "Enter") {
@@ -73,7 +76,7 @@ class ServerManager {
     } else {
       res = generateNewState("invalid player", this.gameStateManager.gameState);
     }
-    this.emitToAllPlayers("type", res);
+    return this.emitToAllPlayers("type", res);
   }
   initial() {
     this.io.on("connection", (socket) => {
