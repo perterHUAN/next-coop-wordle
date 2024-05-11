@@ -1,3 +1,4 @@
+import { domain, hostname } from "./constants";
 export function range(start, end, step = 1) {
   if (start === undefined) throw new Error("must pass at least one parameter");
   if (end === undefined) {
@@ -24,10 +25,10 @@ export function generateUniquePort() {
   return port;
 }
 export function generatePlayRoomUrl(roomId) {
-  return `http://localhost:3000/?roomId=${roomId}`;
-}
+  return `${domain}/?roomId=${roomId}`;
+} 
 export function generateConnectUrl(roomId) {
-  return `http://localhost:${roomId}`;
+  return `${hostname}:${roomId}`;
 }
 export function generateNewState(notification, gameState) {
   if (notification === undefined || gameState === undefined) {
@@ -36,9 +37,8 @@ export function generateNewState(notification, gameState) {
   return { notification, gameState };
 }
 
-const ENALBE_LOG = true;
 export function log(...args) {
-  if (ENALBE_LOG) console.log(...args);
+  if (process.env.NODE_ENV === "development") console.log(...args);
 }
 const keyBoardColors = [
   "--key-bg-correct",
