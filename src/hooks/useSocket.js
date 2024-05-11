@@ -1,14 +1,24 @@
 import React from "react";
 import createClientSocket from "@/socket/createClientSocket";
-import { log, generateConnectUrl, generatePlayRoomUrl } from "@/utils";
+import {
+  log,
+  getSearchParams,
+  generateConnectUrl,
+  generatePlayRoomUrl,
+} from "@/utils";
 import { keyboard } from "@/constants";
-function useSocket(intialRoomId, setGameState, notify) {
+function useSocket(setGameState, notify) {
   const [socket, setSocket] = React.useState(null);
-  const [roomId, setRoomId] = React.useState(intialRoomId);
+  const [roomId, setRoomId] = React.useState("");
 
   log("roomId: ", roomId);
   const connectUrl = !roomId ? "" : generateConnectUrl(roomId);
   const playRoomUrl = !roomId ? "" : generatePlayRoomUrl(roomId);
+
+  React.useEffect(() => {
+    const searchParams = getSearchParams(window.location.search);
+    if ("roomId" in searchParams) setRoomId(searchParams["roomId"]);
+  }, []);
 
   React.useEffect(() => {
     if (connectUrl) {

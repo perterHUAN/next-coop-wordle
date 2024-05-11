@@ -76,3 +76,13 @@ export function generateCellStyle(value, evalution) {
     };
   }
 }
+
+export function getSearchParams(searchStr) {
+  if (!searchStr) return {};
+  return Object.fromEntries(
+    searchStr
+      .slice(1)
+      .split("&")
+      .map((e) => e.split("="))
+  );
+}

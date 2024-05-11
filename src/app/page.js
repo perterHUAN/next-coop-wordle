@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import Notification from "@/components/Notification";
-import { useSearchParams } from "next/navigation";
 import { log } from "@/utils";
 import useSocket from "@/hooks/useSocket";
 import useNotify from "@/hooks/useNotify";
@@ -12,14 +11,9 @@ import Keyboard from "@/components/Keyboard";
 import { generateInitalGameState } from "@/socket/GameStateManager";
 
 export default function Home() {
-  const searchParams = useSearchParams();
   const [message, notify] = useNotify();
   const [gameState, setGameState] = React.useState(generateInitalGameState);
-  const [playRoomUrl, socketId, setRoomId] = useSocket(
-    searchParams.get("roomId") || "",
-    setGameState,
-    notify
-  );
+  const [playRoomUrl, socketId, setRoomId] = useSocket(setGameState, notify);
 
   log("gameState: ", gameState);
 
